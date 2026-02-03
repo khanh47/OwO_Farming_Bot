@@ -327,7 +327,52 @@ while True:
         print("\n⚠️  CAPTCHA DETECTED! ⚠️")
         print("Pausing requests until captcha is resolved...")
         wait_for_captcha_resolution(max_wait_minutes=30)  # Wait up to 30 minutes
-        # After captcha is resolved or timeout, continue the loop
+
+    # Check which gems are currently active
+    print("Checking active gems...")
+    active_gems = check_active_gems()
+    print(f"Active gems: {active_gems}")
+    
+    # Determine which gem types are NOT active
+    inactive_types = get_inactive_gem_types(active_gems)
+    print(f"Inactive gem types: {inactive_types}")
+    
+    # Only proceed if there are inactive types
+    if not inactive_types:
+        print("All gem types are already active, no need to use gems!")
+        riel_count = 0
+    else:
+        # Get inventory and parse available gems
+        print("Fetching inventory...")
+        inventory = get_inventory()
+        available_gems = parse_gems_from_inventory(inventory)
+        print(f"Available gems in inventory: {available_gems}")
+        
+        if available_gems:
+            # Select highest gems from inactive types only
+            selected_gems = select_gems_to_use(available_gems, inactive_types)
+            
+            if selected_gems:
+                # Show which gems are the highest for each type
+                for gem_type in inactive_types:
+                    type_range = gem_types[gem_type]
+                    type_gems = [g for g in available_gems if g in type_range]
+                    if type_gems:
+                        print(f"{gem_type}: available {type_gems}, using {max(type_gems)}")
+                
+                message = format_gem_command(selected_gems)
+                print(f"Using gems: {message}")
+                
+                data = {
+                    "content": message
+                }
+                
+                status = requests.post(url, json=data, headers=header)
+                print(status)
+            else:
+                print("No gems available for inactive types!")
+        else:
+            print("Couldn't fetch inventory!")       # After captcha is resolved or timeout, continue the loop
     
     message_count += 2  # Tăng số lượng tin nhắn đã gửi
     riel_count += 1
@@ -340,54 +385,7 @@ while True:
         message_count = 0  # Đặt lại số lượng tin nhắn
     if riel_count >= 75:
         cnt += 1
-        
-        # Check which gems are currently active
-        print("Checking active gems...")
-        active_gems = check_active_gems()
-        print(f"Active gems: {active_gems}")
-        
-        # Determine which gem types are NOT active
-        inactive_types = get_inactive_gem_types(active_gems)
-        print(f"Inactive gem types: {inactive_types}")
-        
-        # Only proceed if there are inactive types
-        if not inactive_types:
-            print("All gem types are already active, no need to use gems!")
-            riel_count = 0
-        else:
-            # Get inventory and parse available gems
-            print("Fetching inventory...")
-            inventory = get_inventory()
-            available_gems = parse_gems_from_inventory(inventory)
-            print(f"Available gems in inventory: {available_gems}")
-            
-            if available_gems:
-                # Select highest gems from inactive types only
-                selected_gems = select_gems_to_use(available_gems, inactive_types)
-                
-                if selected_gems:
-                    # Show which gems are the highest for each type
-                    for gem_type in inactive_types:
-                        type_range = gem_types[gem_type]
-                        type_gems = [g for g in available_gems if g in type_range]
-                        if type_gems:
-                            print(f"{gem_type}: available {type_gems}, using {max(type_gems)}")
-                    
-                    message = format_gem_command(selected_gems)
-                    print(f"Using gems: {message}")
-                    
-                    data = {
-                        "content": message
-                    }
-                    
-                    status = requests.post(url, json=data, headers=header)
-                    print(status)
-                else:
-                    print("No gems available for inactive types!")
-            else:
-                print("Couldn't fetch inventory!")
-            
-            riel_count = 0
+        riel_count = 0
     if cnt >= 2: 
         wait_time = random.randint(60 * 30, 60 * 60)
         hours = wait_time // 3600
