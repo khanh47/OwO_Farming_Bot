@@ -3,9 +3,10 @@ import time
 import random
 import re
 import winsound
+import os
 
 channel_id = "1292058301760143392" 
-token = "NzQyMzc4MjY4MjIwNzE5MTg3.GXqc2B.Y4iuwJoZhYTt5vqRrzXqsEHfiDFMLxqpAi5MAE"
+token = os.getenv("DISCORD_TOKEN")
 channel_url = "https://discord.com/channels/1287742668939464736/1292058301760143392"
 url = f"https://discordapp.com/api/v9/channels/{channel_id}/messages"
 
