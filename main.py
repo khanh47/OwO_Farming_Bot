@@ -284,10 +284,11 @@ while True:
     elapsed_time = time.time() - start_time
     if elapsed_time >= max_runtime_seconds:
         elapsed_minutes = int(elapsed_time // 60)
-        print(f"\n{'='*50}")
+        separator = "=" * 50
+        print(f"\n{separator}")
         print(f"⏱️  Time limit reached: {elapsed_minutes} minutes elapsed")
         print(f"Exiting gracefully to avoid workflow timeout...")
-        print(f"{'='*50}\n")
+        print(f"{separator}\n")
         break
     message = "oh"
     header = {
