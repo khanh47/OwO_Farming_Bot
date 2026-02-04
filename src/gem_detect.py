@@ -3,15 +3,43 @@ Gem detection and usage module - handles inventory, gem detection, and gem usage
 """
 import os
 import re
+import sys
 import time
 import requests
 from initialization import GEM_TYPES, BASE_URL, get_headers
 
 
+_USE_STAR_GEMS_CACHE = None
+
+
 def use_star_gems():
     """Return True if star gems (type5) should be used."""
-    value = os.getenv("USE_STAR_GEMS", "true").strip().lower()
-    return value in ("1", "true", "yes", "y", "on")
+    global _USE_STAR_GEMS_CACHE
+    if _USE_STAR_GEMS_CACHE is not None:
+        return _USE_STAR_GEMS_CACHE
+
+    env_value = os.getenv("USE_STAR_GEMS")
+    if env_value is not None:
+        value = env_value.strip().lower()
+        _USE_STAR_GEMS_CACHE = value in ("1", "true", "yes", "y", "on")
+        return _USE_STAR_GEMS_CACHE
+
+    if os.getenv("GITHUB_ACTIONS", "").lower() == "true":
+        _USE_STAR_GEMS_CACHE = True
+        return _USE_STAR_GEMS_CACHE
+
+    if sys.stdin.isatty():
+        while True:
+            choice = input("Use star gems (type5)? [y/n]: ").strip().lower()
+            if choice in ("y", "yes"):
+                _USE_STAR_GEMS_CACHE = True
+                return _USE_STAR_GEMS_CACHE
+            if choice in ("n", "no"):
+                _USE_STAR_GEMS_CACHE = False
+                return _USE_STAR_GEMS_CACHE
+
+    _USE_STAR_GEMS_CACHE = True
+    return _USE_STAR_GEMS_CACHE
 
 
 def get_inventory(token):

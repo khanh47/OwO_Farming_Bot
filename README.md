@@ -23,7 +23,7 @@ bot/
 │   ├── initialization.py    # Configuration and token loading
 │   ├── captcha_detect.py    # Captcha detection and handling
 │   ├── gem_detect.py        # Gem detection and usage
-│   ├── local_token.txt      # Discord token (local only)
+│   ├── config.json           # Local config (ignored)
 ├── .github/workflows/
 │   └── main.yml             # GitHub Actions workflow
 ├── requirements.txt         # Python dependencies
@@ -49,12 +49,12 @@ bot/
    pip install -r requirements.txt
    ```
 
-3. **Configure token**
+3. **Configure token & channel**
    
-   You'll need your Discord token from the OwO Bot. The bot supports two methods:
+   You'll need your Discord token and target channel info. The bot supports:
    
-   - **Local development**: Create `src/local_token.txt`
-   - **GitHub Actions**: Use repository secret `DISCORD_TOKEN`
+   - **Local development**: Create `src/config.json` (copy from template)
+   - **GitHub Actions**: Use repository secrets/inputs (`DISCORD_TOKEN`, `CHANNEL_ID`, `CHANNEL_URL`)
    
    See the "Running" section below for specific setup instructions.
 
@@ -96,33 +96,38 @@ Modify these ranges if your gem ID ranges change.
 
 ### Local Development
 
-1. **Add your Discord token**
-   ```bash
-   echo "your_discord_token_here" > src/local_token.txt
+1. **Create local config**
+   Copy the template and fill in your token + channel info:
+   ```json
+   {
+     "token": "your_discord_token_here",
+     "channel_id": "123456789012345678",
+     "channel_url": "https://discord.com/channels/server_id/channel_id"
+   }
    ```
-   
-   Or on Windows PowerShell:
-   ```powershell
-   "your_discord_token_here" | Out-File -FilePath src/local_token.txt -Encoding utf8
-   ```
+   Save it as `src/config.json` (this file is ignored by git).
 
 2. **Run the bot**
    ```bash
    python src/main.py
    ```
 
+   You will be prompted in the terminal to choose whether to use star gems (type5).
+   To skip the prompt, set `USE_STAR_GEMS=true|false` in your environment.
+
 3. **Stop the bot**
    - Press `Ctrl+C` in the terminal
 
 ### GitHub Actions
 
-1. **Add your Discord token as a secret**
+1. **Add secrets for token & channel config**
    - Go to your repository settings
    - Navigate to **Secrets and variables** → **Actions**
    - Click **New repository secret**
-   - Name: `DISCORD_TOKEN`
-   - Value: Paste your Discord token
-   - Click **Add secret**
+   - Add these secrets:
+     - `DISCORD_TOKEN` (your Discord token)
+     - `CHANNEL_ID` (target channel ID)
+     - `CHANNEL_URL` (full channel URL)
 
 2. **The workflow runs automatically**
    - Triggered every 5 minutes (as configured in `.github/workflows/main.yml`)
@@ -138,24 +143,14 @@ Modify these ranges if your gem ID ranges change.
    - In the **Actions** tab, select "Run OwO script"
    - Click **Run workflow**
    - Select the branch and click **Run workflow** again
+   - Use the **Use star gems (type5)** input to toggle star gems for that run
+   - Optional: override `channel_id` / `channel_url` inputs for that run
 
-### GitHub Actions with Local Token File (Alternative)
+### GitHub Actions with Local Config File (Not Recommended)
 
-If you prefer to use `src/local_token.txt` in GitHub Actions:
+If you prefer to use `src/config.json` in GitHub Actions, you would need to commit it.
 
-1. **Add the token file to your repository**
-   ```bash
-   echo "your_discord_token_here" > src/local_token.txt
-   ```
-
-2. **Push to repository**
-   ```bash
-   git add src/local_token.txt
-   git commit -m "Add local token"
-   git push
-   ```
-
-⚠️ **Security Warning**: This method exposes your token in the repository history. The secret method above is more secure.
+⚠️ **Security Warning**: This exposes your token in the repository history. Using secrets is more secure.
 
 ## How It Works
 

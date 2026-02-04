@@ -18,7 +18,8 @@ from gem_detect import (
     check_active_gems,
     get_inactive_gem_types,
     select_gems_to_use,
-    format_gem_command
+    format_gem_command,
+    use_star_gems
 )
 
 
@@ -32,6 +33,9 @@ def main():
     """Main bot loop"""
     # Load token at startup
     token = load_token()
+
+    # Prompt once for star gem usage (if running locally)
+    use_star_gems()
     
     # Initialize counters
     message_count = 0

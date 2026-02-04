@@ -7,6 +7,14 @@ on:
         description: "Use star gems (type5)"
         required: false
         default: "true"
+      channel_id:
+        description: "Discord channel ID"
+        required: false
+        default: ""
+      channel_url:
+        description: "Discord channel URL"
+        required: false
+        default: ""
   schedule:
     # GitHub Actions minimum reliable cron interval is 5 minutes.
     # This runs as frequently as GitHub permits (near "non-stop").
@@ -38,4 +46,6 @@ jobs:
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           USE_STAR_GEMS: ${{ inputs.use_star_gems || 'true' }}
+          CHANNEL_ID: ${{ inputs.channel_id || secrets.CHANNEL_ID }}
+          CHANNEL_URL: ${{ inputs.channel_url || secrets.CHANNEL_URL }}
         run: python src/main.py

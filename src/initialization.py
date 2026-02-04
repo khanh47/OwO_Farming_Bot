@@ -1,6 +1,7 @@
 """
 Initialization module - handles token loading and configuration setup
 """
+import json
 import os
 import sys
 
@@ -17,9 +18,29 @@ try:
 except ImportError:
     HAS_PLYER = False
 
-# Discord channel configuration
-CHANNEL_ID = "1292058301760143392"
-CHANNEL_URL = "https://discord.com/channels/1287742668939464736/1292058301760143392"
+def _load_local_config():
+    config_path = os.path.join(os.path.dirname(__file__), "config.json")
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️  Error reading config.json: {e}")
+    return {}
+
+
+_LOCAL_CONFIG = _load_local_config()
+
+# Discord channel configuration (env for Actions, config.json for local)
+CHANNEL_ID = os.getenv("CHANNEL_ID") or _LOCAL_CONFIG.get("channel_id")
+CHANNEL_URL = os.getenv("CHANNEL_URL") or _LOCAL_CONFIG.get("channel_url")
+
+if not CHANNEL_ID or not CHANNEL_URL:
+    print("ERROR: Channel config not found!")
+    print("  Option 1 (GitHub Actions): Set CHANNEL_ID and CHANNEL_URL as secrets/inputs")
+    print("  Option 2 (Local): Create src/config.json with channel_id and channel_url")
+    sys.exit(1)
+
 BASE_URL = f"https://discordapp.com/api/v9/channels/{CHANNEL_ID}/messages"
 
 # Gem type ranges - define which gem IDs belong to which type
@@ -49,32 +70,21 @@ LONG_BREAK_MAX = 60 * 60      # 60 minutes
 
 
 def load_token():
-    """Load Discord token from local_token.txt or environment variable"""
-    token = None
-    local_token_file = os.path.join(os.path.dirname(__file__), "local_token.txt")
-    
-    if os.path.exists(local_token_file):
-        try:
-            with open(local_token_file, "r") as f:
-                token = f.read().strip()
-            print("✓ Loaded token from local_token.txt")
-        except Exception as e:
-            print(f"⚠️  Error reading local_token.txt: {e}")
-            token = None
-    
-    # Fall back to environment variable if local token not available
-    if not token:
-        token = os.getenv("DISCORD_TOKEN")
-        if token:
-            print("✓ Loaded token from DISCORD_TOKEN environment variable")
-    
-    if not token:
-        print("ERROR: Token not found!")
-        print("  Option 1: Create local_token.txt with your Discord token")
-        print("  Option 2: Set DISCORD_TOKEN environment variable")
-        sys.exit(1)
-    
-    return token
+    """Load Discord token from config.json (local) or environment variable"""
+    token = os.getenv("DISCORD_TOKEN")
+    if token:
+        print("✓ Loaded token from DISCORD_TOKEN environment variable")
+        return token.strip()
+
+    token = _LOCAL_CONFIG.get("token") if isinstance(_LOCAL_CONFIG, dict) else None
+    if token:
+        print("✓ Loaded token from config.json")
+        return str(token).strip()
+
+    print("ERROR: Token not found!")
+    print("  Option 1 (GitHub Actions): Set DISCORD_TOKEN secret")
+    print("  Option 2 (Local): Add token to src/config.json")
+    sys.exit(1)
 
 
 def get_headers(token):

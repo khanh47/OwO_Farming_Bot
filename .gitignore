@@ -36,6 +36,5 @@ ENV/
 .DS_Store
 Thumbs.db
 
-local_token.txt
-local_notify_token.txt
 __pycache__
+config.json
