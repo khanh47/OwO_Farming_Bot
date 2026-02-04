@@ -1,10 +1,17 @@
 """
 Gem detection and usage module - handles inventory, gem detection, and gem usage
 """
+import os
 import re
 import time
 import requests
 from initialization import GEM_TYPES, BASE_URL, get_headers
+
+
+def use_star_gems():
+    """Return True if star gems (type5) should be used."""
+    value = os.getenv("USE_STAR_GEMS", "true").strip().lower()
+    return value in ("1", "true", "yes", "y", "on")
 
 
 def get_inventory(token):
@@ -114,6 +121,8 @@ def get_inactive_gem_types(active_gem_types):
     """Determine which gem types are NOT active"""
     inactive_types = []
     for gem_type in GEM_TYPES.keys():
+        if gem_type == "type5" and not use_star_gems():
+            continue
         # Check if this type is in active gems
         if gem_type not in active_gem_types:
             inactive_types.append(gem_type)
@@ -125,6 +134,8 @@ def select_gems_to_use(available_gems, inactive_types):
     selected_gems = []
     
     for gem_type in inactive_types:
+        if gem_type == "type5" and not use_star_gems():
+            continue
         gem_range = GEM_TYPES[gem_type]
         # Find gems of this type that you actually own
         type_gems = [g for g in available_gems if g in gem_range]

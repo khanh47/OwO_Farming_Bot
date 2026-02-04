@@ -2,6 +2,11 @@ name: Run OwO script
 
 on:
   workflow_dispatch:
+    inputs:
+      use_star_gems:
+        description: "Use star gems (type5)"
+        required: false
+        default: "true"
   schedule:
     # GitHub Actions minimum reliable cron interval is 5 minutes.
     # This runs as frequently as GitHub permits (near "non-stop").
@@ -32,4 +37,5 @@ jobs:
       - name: Run script
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          USE_STAR_GEMS: ${{ inputs.use_star_gems || 'true' }}
         run: python src/main.py
