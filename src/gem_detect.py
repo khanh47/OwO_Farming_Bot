@@ -102,6 +102,11 @@ def parse_active_gems_from_text(text):
             if gem_type not in active_gem_types:  # Avoid duplicates
                 active_gem_types.append(gem_type)
     
+    # Special case: Check for star rarity gems (type5 - star rarity)
+    if 'star' in text.lower() or '★' in text:
+        if 'type5' not in active_gem_types:
+            active_gem_types.append('type5')
+    
     return active_gem_types
 
 

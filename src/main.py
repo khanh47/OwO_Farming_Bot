@@ -53,48 +53,49 @@ def main():
             notify_captcha()  # Send notification alert
             print("\n⚠️  CAPTCHA DETECTED! ⚠️")
             print("Pausing requests until captcha is resolved...")
-            wait_for_captcha_resolution(token, max_wait_minutes=30)  # Wait up to 30 minutes
+            wait_for_captcha_resolution(token, max_wait_minutes=360)  # Wait up to 6 hours
+       
+        if riel_count % 10 == 0 and riel_count > 0:
+            # Check which gems are currently active
+            print("Checking active gems...")
+            active_gem_types = check_active_gems(token)
+            print(f"Active gem types: {active_gem_types}")
         
-        # Check which gems are currently active
-        print("Checking active gems...")
-        active_gem_types = check_active_gems(token)
-        print(f"Active gem types: {active_gem_types}")
+            # Determine which gem types are NOT active
+            inactive_types = get_inactive_gem_types(active_gem_types)
+            print(f"Inactive gem types: {inactive_types}")
         
-        # Determine which gem types are NOT active
-        inactive_types = get_inactive_gem_types(active_gem_types)
-        print(f"Inactive gem types: {inactive_types}")
-        
-        # Only proceed if there are inactive types
-        if not inactive_types:
-            print("All gem types are already active, no need to use gems!")
-            riel_count = 0
-        else:
-            # Get inventory and parse available gems
-            print("Fetching inventory...")
-            inventory = get_inventory(token)
-            available_gems = parse_gems_from_inventory(inventory)
-            print(f"Available gems in inventory: {available_gems}")
-            
-            if available_gems:
-                # Select highest gems from inactive types only
-                selected_gems = select_gems_to_use(available_gems, inactive_types)
-                
-                if selected_gems:
-                    # Show which gems are the highest for each type
-                    for gem_type in inactive_types:
-                        type_range = GEM_TYPES[gem_type]
-                        type_gems = [g for g in available_gems if g in type_range]
-                        if type_gems:
-                            print(f"{gem_type}: available {type_gems}, using {max(type_gems)}")
-                    
-                    message = format_gem_command(selected_gems)
-                    print(f"Using gems: {message}")
-                    
-                    send_command(token, message)
-                else:
-                    print("No gems available for inactive types!")
+            # Only proceed if there are inactive types
+            if not inactive_types:
+                print("All gem types are already active, no need to use gems!")
+                riel_count = 0
             else:
-                print("Couldn't fetch inventory!")
+                # Get inventory and parse available gems
+                print("Fetching inventory...")
+                inventory = get_inventory(token)
+                available_gems = parse_gems_from_inventory(inventory)
+                print(f"Available gems in inventory: {available_gems}")
+                
+                if available_gems:
+                    # Select highest gems from inactive types only
+                    selected_gems = select_gems_to_use(available_gems, inactive_types)
+                    
+                    if selected_gems:
+                        # Show which gems are the highest for each type
+                        for gem_type in inactive_types:
+                            type_range = GEM_TYPES[gem_type]
+                            type_gems = [g for g in available_gems if g in type_range]
+                            if type_gems:
+                                print(f"{gem_type}: available {type_gems}, using {max(type_gems)}")
+                        
+                        message = format_gem_command(selected_gems)
+                        print(f"Using gems: {message}")
+                        
+                        send_command(token, message)
+                    else:
+                        print("No gems available for inactive types!")
+                else:
+                    print("Couldn't fetch inventory!")
         
         message_count += 2  # Increment message count
         riel_count += 1
