@@ -40,11 +40,11 @@ ITERATION_WAIT_MIN = 30
 ITERATION_WAIT_MAX = 60 
 
 # Time range for short breaks after 30 messages (in seconds)
-SHORT_BREAK_MIN = 60
-SHORT_BREAK_MAX = 300
+SHORT_BREAK_MIN = 60 * 3 
+SHORT_BREAK_MAX = 60 * 5
 
 # Time range for long breaks after 2 cycles (in seconds)
-LONG_BREAK_MIN = 60 * 30      # 30 minutes
+LONG_BREAK_MIN = 60 * 45 # 30 minutes
 LONG_BREAK_MAX = 60 * 60      # 60 minutes
 
 

@@ -139,29 +139,6 @@ Modify these ranges if your gem ID ranges change.
    - Click **Run workflow**
    - Select the branch and click **Run workflow** again
 
-## DM Notification Token (Not recommend because it is too easy to be banned)
-
-To receive a DM notification when captcha is detected, configure a **second token**:
-
-- **Local**: create `src/local_notify_token.txt` containing the notify account token
-- **GitHub Actions**: add secret `DISCORD_NOTIFY_TOKEN`
-
-The notify account will send a DM to the user ID configured in `src/captcha_detect.py` (`NOTIFY_USER_ID`).
-
-### Test DM Notification
-
-You can send a test DM to verify the notify token is working:
-
-```bash
-python src/captcha_detect.py test-notify
-```
-
-On Windows PowerShell:
-
-```powershell
-python src/captcha_detect.py test-notify
-```
-
 ### GitHub Actions with Local Token File (Alternative)
 
 If you prefer to use `src/local_token.txt` in GitHub Actions:
