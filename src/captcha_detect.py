@@ -1,30 +1,61 @@
 """
 Captcha detection module - handles captcha detection and alerts
 """
-import requests
+import re
 import time
+import unicodedata
+import requests
 from initialization import HAS_WINSOUND, HAS_PLYER, BASE_URL, get_headers
+
+
+_ZERO_WIDTH_RE = re.compile(r"[\u200b-\u200f\u2060\ufeff]")
+
+
+def _normalize_text(value: str) -> str:
+    """Normalize text to improve keyword matching across obfuscated messages."""
+    if not value:
+        return ""
+    # Unicode normalize and strip combining marks
+    normalized = unicodedata.normalize("NFKD", value)
+    normalized = "".join(ch for ch in normalized if not unicodedata.combining(ch))
+    # Remove zero-width chars and collapse whitespace
+    normalized = _ZERO_WIDTH_RE.sub("", normalized)
+    normalized = re.sub(r"\s+", " ", normalized)
+    return normalized.lower().strip()
 
 
 def check_for_captcha(token):
     """Check if bot is asking for captcha verification"""
-    response = requests.get(BASE_URL + "?limit=15", headers=get_headers(token))
+    response = requests.get(BASE_URL + "?limit=1", headers=get_headers(token))
+    print(f"DEBUG: Captcha check status={response.status_code}")
+    if response.status_code != 200:
+        print(f"DEBUG: Captcha check error body={response.text}")
     if response.status_code == 200:
         messages = response.json()
+        print(f"DEBUG: Captcha check messages={len(messages)}")
         for msg in messages:
-            content = msg.get('content', '').lower()
+            raw_parts = [msg.get('content', '')]
+            content = _normalize_text(msg.get('content', ''))
             # Check embeds too
             if 'embeds' in msg and msg['embeds']:
                 for embed in msg['embeds']:
-                    description = embed.get('description', '').lower()
-                    title = embed.get('title', '').lower()
+                    description = _normalize_text(embed.get('description', ''))
+                    title = _normalize_text(embed.get('title', ''))
+                    raw_parts.append(embed.get('description', ''))
+                    raw_parts.append(embed.get('title', ''))
                     content += ' ' + description + ' ' + title
                     # Include embed fields and author text if present
                     for field in embed.get('fields', []):
-                        content += ' ' + field.get('name', '').lower()
-                        content += ' ' + field.get('value', '').lower()
+                        content += ' ' + _normalize_text(field.get('name', ''))
+                        content += ' ' + _normalize_text(field.get('value', ''))
+                        raw_parts.append(field.get('name', ''))
+                        raw_parts.append(field.get('value', ''))
                     author = embed.get('author', {})
-                    content += ' ' + author.get('name', '').lower()
+                    content += ' ' + _normalize_text(author.get('name', ''))
+                    raw_parts.append(author.get('name', ''))
+
+                    raw_message = " ".join(part for part in raw_parts if part)
+                    print(f"DEBUG: Message content: {raw_message}")
             
             # Check for captcha keywords
             captcha_keywords = [
@@ -34,9 +65,12 @@ def check_for_captcha(token):
                 'are you a real human',
                 'verify that you are human',
                 'please complete your captcha',
+                'please complete this within 10 minutes',
+                'please complete this within 120 minutes',
                 'owobot.com/captcha'
             ]
             if any(keyword in content for keyword in captcha_keywords):
+                print(f"DEBUG: Captcha message detected: {raw_message}")
                 return True
     return False
 

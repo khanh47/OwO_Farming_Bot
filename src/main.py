@@ -45,6 +45,12 @@ def main():
     print("Bot started. Running indefinitely...\n")
     
     while True:
+        if check_for_captcha(token):
+            notify_captcha()  # Send notification alert
+            print("\n⚠️  CAPTCHA DETECTED! ⚠️")
+            print("Pausing requests until captcha is resolved...")
+            time.sleep(3)
+            continue
         # Send basic farming commands
         print("Sending farming commands...")
         send_command(token, "oh")
@@ -53,12 +59,6 @@ def main():
         
         # Check for captcha after sending commands
         time.sleep(1)  # Wait a moment for bot response
-        if check_for_captcha(token):
-            notify_captcha()  # Send notification alert
-            print("\n⚠️  CAPTCHA DETECTED! ⚠️")
-            print("Pausing requests until captcha is resolved...")
-            wait_for_captcha_resolution(token, max_wait_minutes=360)  # Wait up to 6 hours
-            continue
        
         if riel_count % 10 == 0:
             # Check which gems are currently active

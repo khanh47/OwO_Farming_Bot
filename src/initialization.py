@@ -65,8 +65,8 @@ SHORT_BREAK_MIN = 60 * 3
 SHORT_BREAK_MAX = 60 * 5
 
 # Time range for long breaks after 2 cycles (in seconds)
-LONG_BREAK_MIN = 60 * 45 # 30 minutes
-LONG_BREAK_MAX = 60 * 60      # 60 minutes
+LONG_BREAK_MIN = 60 * 45
+LONG_BREAK_MAX = 60 * 80
 
 
 def load_token():

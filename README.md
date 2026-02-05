@@ -1,4 +1,4 @@
-# OwO Bot Farmer
+# OwO_Farming_Bot
 
 An automated Discord bot farming tool for the OwO Bot that handles hunting, gem management, and includes captcha detection with notifications.
 
