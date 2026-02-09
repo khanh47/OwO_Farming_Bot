@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     # GitHub-hosted runners support up to 360 minutes (6 hours).
     # Set to max to allow longer work before the runner is terminated.
-    timeout-minutes: 360
+    timeout-minutes: 60 * 5
     # Prevent overlapping runs; new runs will queue under the same group.
     concurrency:
       group: owo-run
